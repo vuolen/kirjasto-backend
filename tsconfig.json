@@ -3,6 +3,6 @@
         "target": "es6",
         "strict": true,
 	"sourceMap": true,
-	moduleResolution: "node"
+	"moduleResolution": "node"
     }
 }
