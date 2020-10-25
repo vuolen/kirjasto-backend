@@ -13,7 +13,7 @@ Book has
 
 API processes somewhat in an order of implementation:
   - create a book w/ categories and authors `POST /books/`
-  - get ALL information for a book (title, categories, authors, reservations, borrowing) `GET /books/:bookId`
+  - get ALL information for books (title, categories, authors, reservations, borrowing) `GET /books/`
   - mark a book as borrowed `POST /books/borrowing`
   - mark a book as returned / remove borrowing `DELETE /books/borrowing`
   - find out if a book is currently borrowed `GET /books/borrowing`
