@@ -1,8 +1,19 @@
-import * as express from 'express';
-import { apiRouter } from './api'
+require("dotenv").config()
+import { createServer, httpListener } from '@marblejs/core';
+import { bodyParser$ } from '@marblejs/middleware-body';
+import { api$ } from './routes';
 
-const api = express()
 
-api.use("/api", apiRouter)
+const server = createServer({
+    port: 8000,
+    listener: httpListener({
+        middlewares: [
+            bodyParser$()
+        ],
+        effects: [
+            api$
+        ]
+    })
+})
 
-api.listen(8000);
+;(async () => (await server)())()

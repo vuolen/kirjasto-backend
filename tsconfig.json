@@ -1,8 +1,10 @@
 {
     "compilerOptions": {
-        "target": "es6",
+        "target": "es2017",
         "strict": true,
 	"sourceMap": true,
-	"moduleResolution": "node"
+	"moduleResolution": "node",
+	"experimentalDecorators": true,
+	"emitDecoratorMetadata": true
     }
 }

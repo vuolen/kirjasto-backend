@@ -1,0 +1,32 @@
+import { Pool } from "pg"
+import { from, merge } from "rxjs"
+import { mergeMap, map, tap, concatMap, toArray } from "rxjs/operators"
+
+const pool = new Pool()
+
+process.on("beforeExit", async () => {
+    console.log("Disconnecting from database...")
+    pool.end()
+        .then(() => console.log("Succesfully disconnected from database"))
+        .catch(reason => console.log("Failed to disconnect from database: " + reason))
+})
+
+export const query$ = (queryString: string, parameters?: any[]) => from(pool.query(queryString, parameters)).pipe(mergeMap(req => from(req.rows)))
+
+query$(`
+CREATE TABLE IF NOT EXISTS book (
+    id      SERIAL PRIMARY KEY,
+    title   text
+);
+
+CREATE TABLE IF NOT EXISTS author (
+    id      SERIAL PRIMARY KEY,
+    name    text
+);
+
+CREATE TABLE IF NOT EXISTS authorbook (
+    book_id     int REFERENCES Book (id),
+    author_id    int REFERENCES Author (id),
+    primary key (col1, col2)
+);
+`)
