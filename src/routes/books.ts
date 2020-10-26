@@ -1,8 +1,11 @@
 import { combineRoutes, r } from '@marblejs/core'
-import { map, mergeMap, mergeMapTo, toArray } from 'rxjs/operators'
-import { createBook, getBookAuthors, getBooks } from '../services/books'
+import { requestValidator$ } from '@marblejs/middleware-io'
+import { map } from 'rxjs/operators'
+import { CreateBookRequest } from '../common/types'
+import { RxPool } from '../db'
+import { createBook } from '../services/books'
 
-const getBooksRoute = r.pipe(
+/* const getBooksRoute = (db: RxPool) =>  r.pipe(
     r.matchPath("/"),
     r.matchType("GET"),
     r.useEffect(req$ => req$.pipe(
@@ -10,16 +13,17 @@ const getBooksRoute = r.pipe(
         toArray(),
         map(books => ({body: books}))
     ))
-)
+) */
 
-const createBookRoute = r.pipe(
+const createBookRoute = (db: RxPool) =>  r.pipe(
     r.matchPath("/"),
     r.matchType("POST"),
     r.useEffect(reg$ => reg$.pipe(
-        map(req => req.body as {title: string}),
-        mergeMap(createBook),
+        requestValidator$({body: CreateBookRequest}),
+        map(req => req.body as CreateBookRequest),
+        createBook(db),
         map(book => ({body: book}))
     ))
 )
 
-export const bookRoutes = combineRoutes("/books", [getBooksRoute, createBookRoute])
+export const bookRoutes = (db: RxPool) => combineRoutes("/books", [createBookRoute(db)])

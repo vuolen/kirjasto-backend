@@ -1,8 +1,10 @@
-import { Book } from "../common/types";
-import { query$ } from "../db";
+import { Observable } from "rxjs";
+import { mergeMap, tap } from "rxjs/operators";
+import { Book, CreateBookRequest } from "../common/types";
+import { RxPool } from "../db";
 
-export const getBooks = () => query$("SELECT * FROM book")
-
-export const createBook = (book: Book) => query$("INSERT INTO book(title) VALUES($1) RETURNING *", [book.title])
-
-export const getBookAuthors = (id: number) => query$("SELECT * FROM authorbook WHERE book_id=$1", [id])
+export const createBook = (db: RxPool) => (src: Observable<CreateBookRequest>): Observable<Book> => (
+    src.pipe(
+        mergeMap(req => db.query$("INSERT INTO book(title) VALUES($1) RETURNING *", [req.title])),
+    )
+)

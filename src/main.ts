@@ -1,6 +1,7 @@
 require("dotenv").config()
 import { createServer, httpListener } from '@marblejs/core';
 import { bodyParser$ } from '@marblejs/middleware-body';
+import { RxPool } from './db';
 import { api$ } from './routes';
 
 
@@ -11,7 +12,7 @@ const server = createServer({
             bodyParser$()
         ],
         effects: [
-            api$
+            api$(new RxPool())
         ]
     })
 })
