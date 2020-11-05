@@ -1,4 +1,5 @@
 # kirjasto-backend
+![Build status](https://github.com/vuolen/kirjasto-backend/workflows/Build/badge.svg)
 
 ## Commands
 
