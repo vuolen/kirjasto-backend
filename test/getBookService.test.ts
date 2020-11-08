@@ -1,6 +1,6 @@
 import * as E from "fp-ts/lib/Either"
 import { flow } from "fp-ts/lib/function"
-import * as TE from "fp-ts/lib/TaskEither"
+import * as IOTE from "../src/types/IOTaskEither"
 import { ServiceResponse } from "../src/main"
 import { getBookService } from "../src/services/getBookService"
 
@@ -16,8 +16,8 @@ const getLeftOrFail = <E, A>(e: E.Either<E, A>): E => {
 }
 
 test("getBookService returns empty array as body when no books exist", done => {
-    const mockDb = {getBooks: TE.fromEither(E.right([]))}
-    getBookService(mockDb)().then(
+    const mockDb = {getBooks: IOTE.fromEither(E.right([]))}
+    getBookService(mockDb)()().then(
         either => {
             const res = getRightOrFail(either)
             expect(res.body).toEqual([])
@@ -27,8 +27,8 @@ test("getBookService returns empty array as body when no books exist", done => {
 })
 
 test("getBookService returns error when database gives an error", done => {
-    const mockDb = {getBooks: TE.fromEither(E.left(new Error("Database error")))}
-    getBookService(mockDb)().then(
+    const mockDb = {getBooks: IOTE.fromEither(E.left(new Error("Database error")))}
+    getBookService(mockDb)()().then(
         either => {
             const res = getLeftOrFail(either)
             expect(res).toBeInstanceOf(Error)

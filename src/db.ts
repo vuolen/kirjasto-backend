@@ -1,9 +1,10 @@
 import { toError } from "fp-ts/lib/Either";
-import { TaskEither, tryCatch } from "fp-ts/lib/TaskEither";
-import { Pool } from "pg";
+import  * as IOTE from "./types/IOTaskEither"
+import { Pool, QueryResult } from "pg";
+import { pipe } from "fp-ts/lib/function";
 
 export interface DatabaseHandle {
-    getBooks: TaskEither<Error, {id: number, title: string}[]>
+    getBooks: IOTE.IOTaskEither<Error, DbBook[]>
 }
 
 interface DbBook {
@@ -24,11 +25,14 @@ export function createDatabaseHandle() {
     }
 }
 
-const query = (pool: Pool) => (queryString: string): TaskEither<Error, any[]> =>
-    tryCatch(
-        () => pool.query(queryString).then(res => res.rows),
+const query = (pool: Pool) => (queryString: string): IOTE.IOTaskEither<Error, QueryResult<any>> =>
+    IOTE.tryCatch(
+        () => pool.query(queryString),
         toError
     )
 
-export const getBooks = (pool: Pool) => 
-    query(pool)("SELECT * FROM book") as TaskEither<Error, DbBook[]>
+export const getBooks = (pool: Pool) =>
+    pipe(
+        query(pool)("SELECT * FROM book"),
+        IOTE.map(query => query.rows as DbBook[])
+    )
