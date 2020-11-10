@@ -1,5 +1,6 @@
 require('dotenv').config()
 import * as express from 'express'
+import * as cors from 'cors'
 import { flow, pipe } from 'fp-ts/lib/function'
 import { createDatabaseHandle } from './db'
 import { getBookService } from './services/getBookService'
@@ -9,6 +10,7 @@ const db = createDatabaseHandle()
 
 const app = express()
 
+app.use(cors())
 app.use(express.json())
 
 app.get("/books", (req, res) => 
@@ -33,4 +35,4 @@ export interface ServiceResponse {
     body: any
 }
 
-app.listen(8000, () => console.log("Server is running"))
+app.listen(8000, () => console.log("Server is running on port 8000"))
