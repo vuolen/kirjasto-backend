@@ -1,7 +1,7 @@
 import { toError } from "fp-ts/lib/Either";
-import  * as IOTE from "./types/IOTaskEither"
+import { flow } from "fp-ts/lib/function";
 import { Pool, QueryResult } from "pg";
-import { pipe } from "fp-ts/lib/function";
+import * as IOTE from "./types/IOTaskEither";
 
 export interface DatabaseHandle {
     getBooks: IOTE.IOTaskEither<Error, DbBook[]>
@@ -12,7 +12,7 @@ interface DbBook {
     title: string
 }
 
-export function createDatabaseHandle() {
+export const createDatabaseHandle = () => {
     const pool = new Pool()
     pool.query(`
         CREATE TABLE IF NOT EXISTS book (
@@ -25,14 +25,17 @@ export function createDatabaseHandle() {
     }
 }
 
-const query = (pool: Pool) => (queryString: string): IOTE.IOTaskEither<Error, QueryResult<any>> =>
-    IOTE.tryCatch(
-        () => pool.query(queryString),
-        toError
+const query: (queryString: string) => (pool: Pool) => IOTE.IOTaskEither<Error, QueryResult<any>> = 
+    queryString => flow(
+        pool => pool.query(queryString),
+        promise => IOTE.tryCatch(
+            () => promise,
+            toError
+        )
     )
 
-export const getBooks = (pool: Pool) =>
-    pipe(
-        query(pool)("SELECT * FROM book"),
+export const getBooks: (pool: Pool) => IOTE.IOTaskEither<Error, DbBook[]> = 
+    flow(
+        query("SELECT * FROM book"),
         IOTE.map(query => query.rows as DbBook[])
     )
