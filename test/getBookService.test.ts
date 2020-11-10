@@ -32,6 +32,18 @@ test("getBookService returns error when database gives an error", done => {
         either => {
             const res = getLeftOrFail(either)
             expect(res).toBeInstanceOf(Error)
+            expect(res.message).toBe("Database error")
+            done()
+        }
+    )
+})
+
+test("getBookService returns no status code when there is no error", done => {
+    const mockDb = {getBooks: IOTE.fromEither(E.right([]))}
+    getBookService(mockDb)()().then(
+        either => {
+            const res = getRightOrFail(either)
+            expect(res.statusCode).toBeUndefined()
             done()
         }
     )
