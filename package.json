@@ -4,8 +4,8 @@
   "description": "Backend for a simple library reservation system",
   "main": "main.ts",
   "scripts": {
-    "start": "ts-node src/main.ts",
-    "dev": "ts-node-dev src/main.ts",
+    "production": "ts-node src/main.ts",
+    "development": "ts-node-dev src/main.ts",
     "test": "jest"
   },
   "keywords": [],

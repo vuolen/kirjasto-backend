@@ -1,0 +1,24 @@
+version: "3.8"
+services:
+    server:
+        build: .
+        ports:
+            - "8000:8000"
+        environment:
+            - PORT=8000
+            - PGHOST=db
+            - PGDATABASE=postgres
+            - PGUSER=postgres
+            - PGPASSWORD=${POSTGRES_PASSWORD}
+        command: run development
+            
+    db:
+        image: postgres
+        environment:
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+        command: -c log_statement=all
+            
+    adminer:
+        image: adminer
+        ports:
+            - "8080:8080"

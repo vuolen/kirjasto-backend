@@ -27,9 +27,9 @@ export const createDatabaseHandle = () => {
 
 const query: (queryString: string) => (pool: Pool) => IOTE.IOTaskEither<Error, QueryResult<any>> = 
     queryString => flow(
-        pool => pool.query(queryString),
+        pool => () => pool.query(queryString),
         promise => IOTE.tryCatch(
-            () => promise,
+            promise,
             toError
         )
     )
