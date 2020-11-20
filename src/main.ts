@@ -35,7 +35,6 @@ export interface ServiceResponse {
     body: any
 }
 
-const HOST = "localhost"
 const PORT = process.env.PORT || 8000
 
-app.listen(HOST + ":" + PORT, () => console.log("Backend server is running."))
+app.listen(PORT, () => console.log("Backend server is running on " + PORT))
