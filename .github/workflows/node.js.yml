@@ -39,4 +39,4 @@ jobs:
       with:
         token: ${{ secrets.REPO_ACCESS_TOKEN }}
         repository: vuolen/kirjasto
-        event-type: frontend_push
+        event-type: backend_push
