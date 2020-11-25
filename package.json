@@ -6,6 +6,7 @@
   "scripts": {
     "production": "ts-node src/main.ts",
     "development": "ts-node-dev src/main.ts",
+    "wait": "./wait-for-postgres.sh npm run",
     "test": "jest"
   },
   "keywords": [],
