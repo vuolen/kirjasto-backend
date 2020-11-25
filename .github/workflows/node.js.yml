@@ -26,9 +26,17 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: npm ci
     - run: npm test
+    
+    
+  e2e_trigger:
+    
+    runs-on: ubuntu-latest
+    needs: unit_tests
+    
+    steps:
     - name: Trigger E2E tests
       uses: peter-evans/repository-dispatch@v1
       with:
         token: ${{ secrets.REPO_ACCESS_TOKEN }}
         repository: vuolen/kirjasto
-        event-type: backend_push
+        event-type: frontend_push
