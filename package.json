@@ -6,7 +6,6 @@
   "scripts": {
     "production": "ts-node src/main.ts",
     "development": "ts-node-dev src/main.ts",
-    "wait": "./wait-for-postgres.sh npm run",
     "test": "jest"
   },
   "keywords": [],
@@ -14,6 +13,7 @@
   "license": "GPL-3.0-or-later",
   "devDependencies": {
     "@types/cors": "^2.8.8",
+    "@types/express-jwt": "0.0.42",
     "@types/jest": "^26.0.15",
     "@types/pg": "^7.14.5",
     "jest": "^26.5.3",
@@ -27,7 +27,10 @@
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "express-jwt": "^6.0.0",
     "fp-ts": "^2.8.4",
-    "pg": "^8.4.1"
+    "fp-ts-contrib": "^0.1.21",
+    "pg": "^8.4.1",
+    "retry-ts": "^0.1.2"
   }
 }
