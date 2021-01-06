@@ -33,7 +33,9 @@ const map_: Monad2<URI>['map'] = (fa, f) => pipe(fa, map(f))
 const apPar_: Monad2<URI>['ap'] = (fab, fa) => pipe(fab, ap(fa))
 const chain_: Monad2<URI>['chain'] = (ma, f) => pipe(ma, chain(f))
 
-export const left: <E, A = never>(e: E) => IOTaskEither<E, A> = flow(E.left, T.of, I.of)
+export const left: <E, A>(e: E) => IOTaskEither<E, A> = flow(E.left, T.of, I.of)
+
+export const right: <E, A>(a: A) => IOTaskEither<E, A> = flow(E.right, T.of, I.of)
 
 export const of: Monad2<URI>['of'] = flow(TE.right, I.of)
 

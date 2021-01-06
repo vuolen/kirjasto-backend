@@ -9,6 +9,7 @@ import * as T from 'fp-ts/lib/Task'
 import * as I from 'fp-ts/lib/IO'
 
 import IO = I.IO
+import { addBookService } from './services/addBookService'
 
 export interface ServiceResponse {
     statusCode?: number,
@@ -33,9 +34,25 @@ function createExpress(db: DatabaseHandle) {
         express(),
         app => app.use(cors()),
         app => app.use(express.json()),
-        app => app.get("/books", (req, res) => 
+        app => app.get("/books", (_, res) => 
             pipe(
                 getBookService(db),
+                IOTE.fold(
+                    err => ({body: {error: "Internal server error: " + err}, statusCode: 500}),
+                    right => ({body: right.body, statusCode: right.statusCode || 200})
+                ),
+                iote => iote()()
+            ).then(
+                response => {
+                    res.statusCode = response.statusCode
+                    res.json(response.body)
+                }
+            )
+        ),
+        app => app.post("/books", (req, res) => 
+            pipe(
+                req.body,
+                addBookService(db),
                 IOTE.fold(
                     err => ({body: {error: "Internal server error: " + err}, statusCode: 500}),
                     right => ({body: right.body, statusCode: right.statusCode || 200})

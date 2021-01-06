@@ -14,11 +14,16 @@ import { Do } from "fp-ts-contrib/lib/Do";
 import Task = T.Task
 
 export interface DatabaseHandle {
-    getBooks: IOTaskEither<Error, DbBook[]>
+    getBooks: IOTaskEither<Error, DbBook[]>,
+    addBook: (book: DbBookInput) => IOTaskEither<Error, DbBook>
 }
 
 interface DbBook {
     id: number,
+    title: string
+}
+
+interface DbBookInput {
     title: string
 }
 
@@ -41,14 +46,15 @@ export const createDatabaseHandle = (): Task<DatabaseHandle> => {
             E.isLeft
         ),
         T.map(() => ({
-            getBooks: getBooks(pool)
+            getBooks: getBooks(pool),
+            addBook: addBook(pool)
         }))
     )
 }
 
-const query: (queryString: string) => (pool: Pool) => IOTaskEither<Error, QueryResult<any>> = 
-    queryString => flow(
-        pool => () => pool.query(queryString),
+const query: (queryString: string, values?: any[]) => (pool: Pool) => IOTaskEither<Error, QueryResult<any>> = 
+    (queryString, values) => flow(
+        pool => () => pool.query(queryString, values),
         promise => IOTE.tryCatch(
             promise,
             toError
@@ -59,4 +65,11 @@ export const getBooks: (pool: Pool) => IOTaskEither<Error, DbBook[]> =
     flow(
         query("SELECT * FROM book"),
         IOTE.map(query => query.rows as DbBook[])
+    )
+
+export const addBook: (pool: Pool) => (book: DbBookInput) => IOTaskEither<Error, DbBook> = (pool) => (book) =>
+    pipe(
+        pool,
+        query("INSERT INTO book(title) VALUES($1) RETURNING *", [book.title]),
+        IOTE.map(query => query.rows[0] as DbBook)
     )
