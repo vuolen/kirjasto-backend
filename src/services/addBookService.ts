@@ -18,7 +18,7 @@ const validate = (request: AddBookRequest): Either<string, AddBookRequest> =>
     )
     
 
-export const addBookService = (db: DatabaseHandle) => (req: AddBookRequest): IOTE.IOTaskEither<Error, ServiceResponse> =>
+export const addBookService = (db: Pick<DatabaseHandle, "addBook">) => (req: AddBookRequest): IOTE.IOTaskEither<Error, ServiceResponse> =>
     pipe(
         req,
         validate,
