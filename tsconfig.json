@@ -2,10 +2,11 @@
     "compilerOptions": {
         "target": "es2017",
         "strict": true,
-	"sourceMap": true,
-    "moduleResolution": "node",
-    "module": "commonjs",
-	"experimentalDecorators": true,
-	"emitDecoratorMetadata": true
+        "sourceMap": true,
+        "moduleResolution": "node",
+        "module": "commonjs",
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "typeRoots": ["./node_modules/@types", "./typings"]
     }
 }

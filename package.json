@@ -4,8 +4,8 @@
   "description": "Backend for a simple library reservation system",
   "main": "main.ts",
   "scripts": {
-    "production": "ts-node src/main.ts",
-    "development": "ts-node-dev src/main.ts",
+    "production": "ts-node --files src/main.ts",
+    "development": "ts-node-dev --files src/main.ts",
     "test": "jest"
   },
   "keywords": [],
@@ -30,6 +30,7 @@
     "express-jwt": "^6.0.0",
     "fp-ts": "^2.8.4",
     "fp-ts-contrib": "^0.1.21",
+    "jwks-rsa": "^1.12.2",
     "pg": "^8.4.1",
     "retry-ts": "^0.1.2"
   }
