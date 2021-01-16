@@ -34,7 +34,7 @@ const createTable = (pool: Pool) => pipe(
             title TEXT NOT NULL
         )
     `)(pool),
-    IO.chainFirst(() => log("Trying to connect to database"))
+    IO.chainFirst(() => log("Trying to connect to database at " + process.env.DATABASE_URL))
 )
 
 export const createDatabaseHandle = (): Task<DatabaseHandle> => {
