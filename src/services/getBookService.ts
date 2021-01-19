@@ -1,11 +1,12 @@
 import { flow } from "fp-ts/lib/function";
 import { DatabaseHandle } from "../db";
 import { ServiceResponse } from "../main";
-import * as IOTE from "../types/IOTaskEither";
+import * as TE from "fp-ts/lib/TaskEither";
 
+import TaskEither = TE.TaskEither
 
-export const getBookService: (db: Pick<DatabaseHandle, "getBooks">) => IOTE.IOTaskEither<Error, ServiceResponse> = 
+export const getBookService: (db: Pick<DatabaseHandle, "getBooks">) => TaskEither<Error, ServiceResponse> = 
     flow(
         db => db.getBooks,
-        IOTE.map(books => ({body: books}))
+        TE.map(books => ({body: books}))
     )

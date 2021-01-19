@@ -3,7 +3,7 @@ import * as cors from 'cors'
 import { flow, pipe } from 'fp-ts/lib/function'
 import { createDatabaseHandle, DatabaseHandle } from './db'
 import { getBookService } from './services/getBookService'
-import * as IOTE from './types/IOTaskEither'
+import * as TE from 'fp-ts/lib/TaskEither'
 import * as E from 'fp-ts/lib/Either'
 import * as T from 'fp-ts/lib/Task'
 import * as I from 'fp-ts/lib/IO'
@@ -40,11 +40,11 @@ function createExpress(db: DatabaseHandle) {
         app => app.get("/books", (_, res) => 
             pipe(
                 getBookService(db),
-                IOTE.fold(
-                    err => ({body: {error: "Internal server error: " + err}, statusCode: 500}),
-                    right => ({body: right.body, statusCode: right.statusCode || 200})
+                TE.fold(
+                    err => T.of({body: {error: "Internal server error: " + err}, statusCode: 500}),
+                    right => T.of({body: right.body, statusCode: right.statusCode || 200})
                 ),
-                iote => iote()()
+                taskEither => taskEither()
             ).then(
                 response => {
                     res.statusCode = response.statusCode
@@ -66,11 +66,11 @@ function createExpress(db: DatabaseHandle) {
                     E.map(
                         flow(
                             addBookService(db),
-                            IOTE.fold(
-                                err => ({body: {error: "Internal server error: " + err}, statusCode: 500}),
-                                right => ({body: right.body, statusCode: right.statusCode || 200})
+                            TE.fold(
+                                err => T.of({body: {error: "Internal server error: " + err}, statusCode: 500}),
+                                right => T.of({body: right.body, statusCode: right.statusCode || 200})
                             ),
-                            iote => iote()()
+                            taskEither => taskEither()
                         )
                     ),
                     E.fold(

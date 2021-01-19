@@ -2,20 +2,19 @@ import { toError } from "fp-ts/lib/Either";
 import { flow, pipe } from "fp-ts/lib/function";
 import { retrying } from 'retry-ts/lib/Task'
 import { Pool, Query, QueryResult } from "pg";
-import {IOTaskEither} from "./types/IOTaskEither";
-import * as IOTE from "./types/IOTaskEither";
+import * as TE from "fp-ts/lib/TaskEither";
 import * as E from "fp-ts/lib/Either"
 import * as T from "fp-ts/lib/Task"
 import * as IO from "fp-ts/lib/IO"
 import { constantDelay } from "retry-ts";
 import { log } from "fp-ts/lib/Console";
-import { Do } from "fp-ts-contrib/lib/Do";
 
 import Task = T.Task
+import TaskEither = TE.TaskEither
 
 export interface DatabaseHandle {
-    getBooks: IOTaskEither<Error, DbBook[]>,
-    addBook: (book: DbBookInput) => IOTaskEither<Error, DbBook>
+    getBooks: TaskEither<Error, DbBook[]>,
+    addBook: (book: DbBookInput) => TaskEither<Error, DbBook>
 }
 
 interface DbBook {
@@ -27,14 +26,13 @@ interface DbBookInput {
     title: string
 }
 
-const createTable = (pool: Pool) => pipe(
+const createTable = (pool: Pool) => () => pipe(
     query(`
         CREATE TABLE IF NOT EXISTS book (
             id SERIAL PRIMARY KEY,
             title TEXT NOT NULL
         )
-    `)(pool),
-    IO.chainFirst(() => log("Trying to connect to database at " + process.env.DATABASE_URL))
+    `)(pool)
 )
 
 export const createDatabaseHandle = (): Task<DatabaseHandle> => {
@@ -52,24 +50,24 @@ export const createDatabaseHandle = (): Task<DatabaseHandle> => {
     )
 }
 
-const query: (queryString: string, values?: any[]) => (pool: Pool) => IOTaskEither<Error, QueryResult<any>> = 
+const query: (queryString: string, values?: any[]) => (pool: Pool) => TaskEither<Error, QueryResult<any>> = 
     (queryString, values) => flow(
         pool => () => pool.query(queryString, values),
-        promise => IOTE.tryCatch(
+        promise => TE.tryCatch(
             promise,
             toError
         )
     )
 
-export const getBooks: (pool: Pool) => IOTaskEither<Error, DbBook[]> = 
+export const getBooks: (pool: Pool) => TaskEither<Error, DbBook[]> = 
     flow(
         query("SELECT * FROM book"),
-        IOTE.map(query => query.rows as DbBook[])
+        TE.map(query => query.rows as DbBook[])
     )
 
-export const addBook: (pool: Pool) => (book: DbBookInput) => IOTaskEither<Error, DbBook> = (pool) => (book) =>
+export const addBook: (pool: Pool) => (book: DbBookInput) => TaskEither<Error, DbBook> = (pool) => (book) =>
     pipe(
         pool,
         query("INSERT INTO book(title) VALUES($1) RETURNING *", [book.title]),
-        IOTE.map(query => query.rows[0] as DbBook)
+        TE.map(query => query.rows[0] as DbBook)
     )
