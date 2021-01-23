@@ -8,7 +8,8 @@ import * as E from "fp-ts/lib/Either"
 import TaskEither = TE.TaskEither
 
 export type AddBookRequest = {
-    title: string
+    title: string,
+    author: string
 }
 
 const validate = (request: AddBookRequest): Either<string, AddBookRequest> =>

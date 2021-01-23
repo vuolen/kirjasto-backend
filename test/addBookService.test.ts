@@ -3,11 +3,10 @@ import * as TE from "fp-ts/lib/TaskEither"
 import { addBookService } from "../src/services/addBookService"
 
 import Either = E.Either
-import { DatabaseHandle } from "../src/db"
 import { getLeftOrFail, getRightOrFail } from "./util"
 
-const VALID_BOOK = {id: 1, title: "Test Book"}
-const VALID_ADDBOOK_REQUEST = {title: "Test Book"}
+const VALID_BOOK = {id: 1, title: "Test Book", author: "Test Testersson"}
+const VALID_ADDBOOK_REQUEST = {title: "Test Book", author: "Test Testersson"}
 
 test("addBookService returns a body with an error given an empty title", done => {
     const mockDb = {addBook: () => TE.right(VALID_BOOK)}

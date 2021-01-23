@@ -19,18 +19,21 @@ export interface DatabaseHandle {
 
 interface DbBook {
     id: number,
-    title: string
+    title: string,
+    author?: string
 }
 
 interface DbBookInput {
     title: string
+    author?: string
 }
 
 const createTable = (pool: Pool) => () => pipe(
     query(`
         CREATE TABLE IF NOT EXISTS book (
             id SERIAL PRIMARY KEY,
-            title TEXT NOT NULL
+            title TEXT NOT NULL,
+            author TEXT
         )
     `)(pool)
 )
@@ -59,15 +62,27 @@ const query: (queryString: string, values?: any[]) => (pool: Pool) => TaskEither
         )
     )
 
+const removeNulls = (obj: any) => {
+    for (var propName in obj) {
+        if (obj[propName] === null) {
+            delete obj[propName];
+        }
+    }
+    return obj
+}
+
 export const getBooks: (pool: Pool) => TaskEither<Error, DbBook[]> = 
     flow(
         query("SELECT * FROM book"),
-        TE.map(query => query.rows as DbBook[])
+        TE.map(flow(
+            query => query.rows as DbBook[],
+            books => books.map(removeNulls)
+        )),
     )
 
 export const addBook: (pool: Pool) => (book: DbBookInput) => TaskEither<Error, DbBook> = (pool) => (book) =>
     pipe(
         pool,
-        query("INSERT INTO book(title) VALUES($1) RETURNING *", [book.title]),
+        query("INSERT INTO book(title, author) VALUES($1, $2) RETURNING *", [book.title, book.author]),
         TE.map(query => query.rows[0] as DbBook)
     )
