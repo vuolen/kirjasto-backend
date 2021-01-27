@@ -13,7 +13,7 @@
   "license": "GPL-3.0-or-later",
   "devDependencies": {
     "@types/cors": "^2.8.9",
-    "@types/express-jwt": "0.0.42",
+    "@types/express-jwt": "6.0.0",
     "@types/jest": "^26.0.20",
     "@types/pg": "^7.14.9",
     "jest": "^26.6.3",
