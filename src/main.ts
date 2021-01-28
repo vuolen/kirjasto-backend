@@ -1,7 +1,7 @@
 import * as express from 'express'
 import * as cors from 'cors'
 import { flow, pipe } from 'fp-ts/lib/function'
-import { createDatabaseHandle, DatabaseHandle } from './db'
+import { createDatabaseHandle, DatabaseHandle } from './db/db'
 import { getBookService } from './services/getBookService'
 import * as TE from 'fp-ts/lib/TaskEither'
 import * as E from 'fp-ts/lib/Either'
@@ -15,10 +15,17 @@ import IO = I.IO
 import { addBookService } from './services/addBookService'
 import JwksRsa = require('jwks-rsa')
 
-export interface ServiceResponse {
+export interface ServiceResponse<T = any> {
     statusCode?: number,
-    body: any
+    body: T | APIError
 }
+
+export type APIError = {error: string}
+
+export function isAPIError(response: any): response is APIError {
+    return response.error !== undefined
+}
+
 const PORT = process.env.PORT || 8000
 
 const main: IO<void> =
@@ -60,7 +67,6 @@ function createExpress(db: DatabaseHandle) {
                 pipe(
                     req.user.scope.includes("add:book") ? E.right(req.body) : E.left("Invalid permissions: add:book"),
                     asd => {
-                        console.log(req.user)
                         return asd
                     },
                     E.map(
