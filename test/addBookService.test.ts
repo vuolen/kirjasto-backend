@@ -10,8 +10,7 @@ import { isAPIError } from "../src/main"
 const VALID_AUTHOR = {id: 1, name: "Test Testersson"}
 const VALID_BOOK = {id: 1, title: "Test Book", author_id: O.some(1), author: O.some(VALID_AUTHOR)}
 const VALID_ADDBOOK_REQUEST = {title: "Test Book", author: {name: "Test Testersson"}}
-
-const VALID_BOOK_RESPONSE = {id: 1, title: "Test Book", author_id: 1, author: VALID_AUTHOR}
+const VALID_ADDBOOK_RESPONSE = {id: 1, title: "Test Book", author_id: 1, author: VALID_AUTHOR}
 
 export const unimpl = (...args: any) => {throw new Error("Unimplemented")}
 
@@ -54,7 +53,7 @@ test("addBookService returns created book with valid request", done => {
     addBookService(mockDb)(VALID_ADDBOOK_REQUEST)().then(
         either => {
             const res = getRightOrFail(either)
-            expect(res.body).toEqual(VALID_BOOK_RESPONSE)
+            expect(res.body).toEqual(VALID_ADDBOOK_RESPONSE)
             done()
         }
     )

@@ -13,54 +13,42 @@ import Task = T.Task
 import TaskEither = TE.TaskEither
 import Option = O.Option
 import { createPSQLHandle, SQLHandle, SQLQueryResult } from "./sqlHandle";
+import * as sql from "../sql/book.queries";
 
 export interface DatabaseHandle {
-    getBooks: TaskEither<Error, Array<DbBook>>,
-    addBook: (book: DbBookInput) => TaskEither<Error, DbBook>
-    getAuthor: (id: DbAuthor["id"]) => TaskEither<Error, DbAuthor>,
-    addAuthor: (author: DbAuthorInput) => TaskEither<Error, DbAuthor>
+    getBooks: TaskEither<Error, Array<Book>>,
+    addBook: (book: BookInput) => TaskEither<Error, Book>
+    getAuthor: (id: Author["id"]) => TaskEither<Error, Author>,
+    addAuthor: (author: AuthorInput) => TaskEither<Error, Author>
 }
 
-interface DbBook {
+interface Book {
     id: number,
     title: string,
-    author_id: Option<number>
-    author: Option<DbAuthor>
+    author: Option<Author>
 }
 
-interface DbBookInput {
+interface BookInput {
     title: string
     author_id: Option<number>
 }
 
-interface DbAuthor {
+interface Author {
     id: number,
     name: string
 }
 
-interface DbAuthorInput {
+interface AuthorInput {
     name: string
 }
 
 const createTable = (handle: SQLHandle) => 
     flow(
         () => console.log(`Trying to connect to database ${process.env.DATABASE_URL}`),
-        () => handle.query(`
-            CREATE TABLE IF NOT EXISTS author (
-                id INT UNIQUE GENERATED ALWAYS AS IDENTITY,
-                name TEXT NOT NULL
-            );
-
-            CREATE TABLE IF NOT EXISTS book (
-                id INT UNIQUE GENERATED ALWAYS AS IDENTITY,
-                title TEXT NOT NULL,
-                author_id INT,
-
-                CONSTRAINT fk_author
-                    FOREIGN KEY (author_id)
-                        REFERENCES author(id)
-            );
-        `)
+        () => handle.run(sql.createAuthorTable, undefined),
+        TE.chain(
+            () => handle.run(sql.createBookTable, undefined)
+        )
     )
 
 export const createDatabaseHandle = (): Task<DatabaseHandle> => {
@@ -91,9 +79,8 @@ const removeNulls = (obj: any) => {
 
 export const getBooks: (handle: SQLHandle) => DatabaseHandle["getBooks"] =
     (handle) => pipe(
-        handle.query("SELECT * FROM book"),
+        handle.run(sql.getAllBooks, undefined),
         TE.chain(flow(
-            query => query.rows,
             A.map(
                 row => ({...row, author_id: O.fromNullable(row.author_id)})
             ),
@@ -107,7 +94,7 @@ export const getBooks: (handle: SQLHandle) => DatabaseHandle["getBooks"] =
                     ),
                     O.sequence(TE.ApplicativePar),
                     TE.map(
-                        author => ({...row, author} as DbBook)
+                        author => ({...row, author} as Book)
                     )
                 )
             ),
@@ -115,12 +102,13 @@ export const getBooks: (handle: SQLHandle) => DatabaseHandle["getBooks"] =
         ))
     )
 
+
 export const addBook: (handle: SQLHandle) => DatabaseHandle["addBook"] =
-    (handle) => (book) => pipe(
-        handle.query("INSERT INTO book(title, author_id) VALUES($1, $2) RETURNING *", [book.title, O.toUndefined(book.author_id)]),
+    (handle) => ({title, author_id}) => pipe(
+        handle.run(sql.addBook, {title, author_id: O.toUndefined(author_id)}),
         TE.chain(
             flow(
-                query => query.rows[0],
+                rows => rows[0],
                 row => pipe(
                     row.author_id,
                     O.fromNullable,
@@ -131,7 +119,7 @@ export const addBook: (handle: SQLHandle) => DatabaseHandle["addBook"] =
                     ),
                     O.sequence(TE.ApplicativePar),
                     TE.map(
-                        author => ({...row, author} as DbBook)
+                        author => ({title: row.title, author} as Book)
                     )
                 )
             )
@@ -140,12 +128,12 @@ export const addBook: (handle: SQLHandle) => DatabaseHandle["addBook"] =
 
 export const getAuthor: (handle: SQLHandle) => DatabaseHandle["getAuthor"] = 
     (handle) => (id) => pipe(
-        handle.query("SELECT * FROM author WHERE id=$1", [id]),
-        TE.map(query => query.rows[0] as DbAuthor)
+        handle.run(sql.getAuthorById, {id}),
+        TE.map(rows => rows[0] as Author)
     )
 
 export const addAuthor: (handle: SQLHandle) => DatabaseHandle["addAuthor"] =
-    (handle) => (author) => pipe(
-        handle.query("INSERT INTO author(name) VALUES($1) RETURNING *", [author.name]),
-        TE.map(query => query.rows[0] as DbAuthor)
+    (handle) => ({name}) => pipe(
+        handle.run(sql.addAuthor, {name}),
+        TE.map(rows => rows[0] as Author)
     )

@@ -1,3 +1,4 @@
+import { PreparedQuery } from "@pgtyped/query";
 import { toError } from "fp-ts/lib/Either";
 import { flow, pipe } from "fp-ts/lib/function";
 import { IO } from "fp-ts/lib/IO";
@@ -9,7 +10,7 @@ import { Pool, QueryResult } from "pg";
 import TaskEither = TE.TaskEither
 
 export interface SQLHandle {
-    query: (queryString: string, params?: any[]) => TaskEither<Error, SQLQueryResult>
+    run<TParamType, TResultType>(query: PreparedQuery<TParamType, TResultType>, parameters: TParamType): TaskEither<Error, TResultType[]>
 }
 
 export interface SQLQueryResultRow {
@@ -24,9 +25,9 @@ export const createPSQLHandle: IO<SQLHandle> =
     () => pipe(
         new Pool({connectionString: process.env.DATABASE_URL}),
         (pool): SQLHandle => ({
-            query: flow(
+            run: flow(
                 TE.tryCatchK(
-                    pool.query.bind(pool),
+                    (query, params) => query.run(params, pool),
                     toError
                 )
             ),
