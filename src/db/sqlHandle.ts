@@ -10,7 +10,7 @@ import { Pool, QueryResult } from "pg";
 import TaskEither = TE.TaskEither
 
 export interface SQLHandle {
-    run<TParamType, TResultType>(query: PreparedQuery<TParamType, TResultType>, parameters: TParamType): TaskEither<Error, TResultType[]>
+    run<TParamType, TResultType>(query: PreparedQuery<TParamType, TResultType>, parameters: TParamType): TaskEither<Error, Array<TResultType>>
 }
 
 export interface SQLQueryResultRow {

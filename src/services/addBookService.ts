@@ -5,35 +5,44 @@ import { ServiceResponse } from "../main";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as E from "fp-ts/lib/Either"
 import * as O from "fp-ts/lib/Option"
+import * as t from 'io-ts'
+import { failure } from 'io-ts/PathReporter'
 
 import TaskEither = TE.TaskEither
 import Option = O.Option
 
-export type AddBookRequest = {
-    title: string,
-    author?: number | {name: string}
-}
+type NonEmptyString = string
 
-interface AddBookResponse {
-    id: number,
-    title: string, 
-    author?: {id: number, name: string}
-}
+const nonemptystring = new t.Type<NonEmptyString, string, unknown>(
+    'nonemptystring',
+    (input: unknown): input is string => typeof input === 'string' && input.length > 0,
 
-const validate = (request: AddBookRequest): Either<string, AddBookRequest> =>
-    pipe(
-        E.right(request),
-        E.chain(
-            req => req.title.length === 0 ? E.left("Title can not be empty") : E.right(req)
-        )
-    )
-    
+    (input, context) => (typeof input === 'string' && input.length > 0 ? t.success(input) : t.failure(input, context)),
+
+    t.identity
+  )
+
+const AddBookRequest = t.type({
+    title: nonemptystring,
+    author: t.union([t.number, t.type({name: nonemptystring}), t.undefined])
+})
+
+type AddBookRequest = t.TypeOf<typeof AddBookRequest>
+
+const AddBookResponse = t.type({
+    id: t.number,
+    title: nonemptystring,
+    author: t.union([t.type({name: nonemptystring}), t.undefined])
+})
+
+type AddBookResponse = t.TypeOf<typeof AddBookResponse>
+
 
 export const addBookService = (db: Pick<DatabaseHandle, "addBook" | "getAuthor" | "addAuthor">): (req: AddBookRequest) => TaskEither<Error, ServiceResponse<AddBookResponse>> =>
     flow(
-        validate,
+        AddBookRequest.decode,
         E.fold(
-            error => TE.right({body: {error}, statusCode: 422} as ServiceResponse),
+            errors => TE.right({body: {error: failure(errors)}, statusCode: 422} as ServiceResponse),
             req => pipe(
                 req.author,
                 O.fromNullable,
@@ -50,11 +59,10 @@ export const addBookService = (db: Pick<DatabaseHandle, "addBook" | "getAuthor"
                     )
                 ),
                 TE.map(
-                    book => ({body: {
-                        title: book.title,
-                        author: O.toUndefined(book.author)
-                    }
-                    })
+                    ({id, title, author}) => pipe(
+                        AddBookResponse.encode({id, title, author: O.toUndefined(author)}),
+                        response => ({body: response})
+                    )
                 )
             )
         )
