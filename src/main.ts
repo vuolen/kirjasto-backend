@@ -65,7 +65,7 @@ function createExpress(db: DatabaseHandle) {
             }), algorithms: ["RS256"]}),
             (req, res) => 
                 pipe(
-                    req.user.scope.includes("add:book") ? E.right(req.body) : E.left("Invalid permissions: add:book"),
+                    req.user.scope && req.user.scope.includes("add:book") ? E.right(req.body) : E.left("Invalid permissions: add:book"),
                     E.map(
                         flow(
                             addBookService(db),
