@@ -3,17 +3,16 @@ import { retrying } from 'retry-ts/lib/Task'
 import * as TE from "fp-ts/lib/TaskEither";
 import * as E from "fp-ts/lib/Either"
 import * as T from "fp-ts/lib/Task"
-import * as I from "fp-ts/lib/IO"
 import * as O from "fp-ts/lib/Option"
 import * as A from "fp-ts/lib/Array"
+import { createPSQLHandle, SQLHandle } from "./sqlHandle";
+import * as sql from "../sql/book.queries";
 
 import { constantDelay } from "retry-ts";
 
 import Task = T.Task
 import TaskEither = TE.TaskEither
 import Option = O.Option
-import { createPSQLHandle, SQLHandle, SQLQueryResult } from "./sqlHandle";
-import * as sql from "../sql/book.queries";
 
 export interface DatabaseHandle {
     getBooks: TaskEither<Error, Array<Book>>,
@@ -30,7 +29,7 @@ interface Book {
 
 interface BookInput {
     title: string
-    author_id: Option<number>
+    author_id: Option<Author["id"]>
 }
 
 interface Author {
@@ -42,7 +41,7 @@ interface AuthorInput {
     name: string
 }
 
-const createTable = (handle: SQLHandle) => 
+const createTables = (handle: SQLHandle) => 
     flow(
         () => console.log(`Trying to connect to database ${process.env.DATABASE_URL}`),
         () => handle.run(sql.createAuthorTable, undefined),
@@ -51,12 +50,29 @@ const createTable = (handle: SQLHandle) =>
         )
     )
 
+const databaseRowToBook = (handle: SQLHandle) => (row: any) => 
+    pipe(
+        row.author_id,
+        O.fromNullable,
+        O.map(
+            getAuthor(handle),
+        ),
+        O.sequence(TE.ApplicativePar),
+        TE.map(
+            author => ({title: row.title, author} as Book)
+        )
+    )
+
+
+
+// EXPORTS
+
 export const createDatabaseHandle = (): Task<DatabaseHandle> => {
     const sqlHandle = createPSQLHandle()
     return pipe(
         retrying(
             constantDelay(2000),
-            createTable(sqlHandle),
+            createTables(sqlHandle),
             E.isLeft
         ),
         T.map(() => ({
@@ -68,40 +84,18 @@ export const createDatabaseHandle = (): Task<DatabaseHandle> => {
     )
 }
 
-const removeNulls = (obj: any) => {
-    for (var propName in obj) {
-        if (obj[propName] === null) {
-            delete obj[propName];
-        }
-    }
-    return obj
-}
-
 export const getBooks: (handle: SQLHandle) => DatabaseHandle["getBooks"] =
     (handle) => pipe(
         handle.run(sql.getAllBooks, undefined),
-        TE.chain(flow(
-            A.map(
-                row => ({...row, author_id: O.fromNullable(row.author_id)})
-            ),
-            A.map(
-                row => pipe(
-                    row.author_id,
-                    O.map(
-                        flow(
-                            getAuthor(handle),
-                        )
-                    ),
-                    O.sequence(TE.ApplicativePar),
-                    TE.map(
-                        author => ({...row, author} as Book)
-                    )
-                )
-            ),
-            A.sequence(TE.ApplicativePar)
-        ))
+        TE.chain(
+            flow(
+                A.map(
+                    databaseRowToBook(handle)
+                ),
+                A.sequence(TE.ApplicativePar)
+            )
+        )
     )
-
 
 export const addBook: (handle: SQLHandle) => DatabaseHandle["addBook"] =
     (handle) => ({title, author_id}) => pipe(
@@ -109,19 +103,7 @@ export const addBook: (handle: SQLHandle) => DatabaseHandle["addBook"] =
         TE.chain(
             flow(
                 rows => rows[0],
-                row => pipe(
-                    row.author_id,
-                    O.fromNullable,
-                    O.map(
-                        flow(
-                            getAuthor(handle),
-                        )
-                    ),
-                    O.sequence(TE.ApplicativePar),
-                    TE.map(
-                        author => ({title: row.title, author} as Book)
-                    )
-                )
+                databaseRowToBook(handle)
             )
         )
     )

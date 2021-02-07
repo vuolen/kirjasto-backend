@@ -5,7 +5,7 @@ import { addBookService } from "../src/services/addBookService"
 
 import Either = E.Either
 import { getLeftOrFail, getRightOrFail } from "./util"
-import { isAPIError } from "../src/main"
+import { isAPIError } from "../src/services/ServiceResponse"
 
 const VALID_AUTHOR = {id: 1, name: "Test Testersson"}
 const VALID_BOOK = {id: 1, title: "Test Book", author_id: O.some(1), author: O.some(VALID_AUTHOR)}

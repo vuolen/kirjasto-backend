@@ -1,7 +1,5 @@
-import { Either } from "fp-ts/lib/Either";
 import { flow, pipe } from "fp-ts/lib/function";
-import { createDatabaseHandle, DatabaseHandle } from "../db/db";
-import { ServiceResponse } from "../main";
+import { DatabaseHandle } from "../db/db";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as E from "fp-ts/lib/Either"
 import * as O from "fp-ts/lib/Option"
@@ -10,17 +8,14 @@ import { failure } from 'io-ts/PathReporter'
 
 import TaskEither = TE.TaskEither
 import Option = O.Option
+import { Service, ServiceResponse } from "../types/Service";
 
-type NonEmptyString = string
-
-const nonemptystring = new t.Type<NonEmptyString, string, unknown>(
+const nonemptystring = new t.Type<string, string, unknown>(
     'nonemptystring',
     (input: unknown): input is string => typeof input === 'string' && input.length > 0,
-
     (input, context) => (typeof input === 'string' && input.length > 0 ? t.success(input) : t.failure(input, context)),
-
     t.identity
-  )
+)
 
 const AddBookRequest = t.type({
     title: nonemptystring,
@@ -37,9 +32,9 @@ const AddBookResponse = t.type({
 
 type AddBookResponse = t.TypeOf<typeof AddBookResponse>
 
-
-export const addBookService = (db: Pick<DatabaseHandle, "addBook" | "getAuthor" | "addAuthor">): (req: AddBookRequest) => TaskEither<Error, ServiceResponse<AddBookResponse>> =>
+export const addBookService = (db: Pick<DatabaseHandle, "addBook" | "getAuthor" | "addAuthor">): Service<AddBookResponse> =>
     flow(
+        req => req.body,
         AddBookRequest.decode,
         E.fold(
             errors => TE.right({body: {error: failure(errors)}, statusCode: 422} as ServiceResponse),
