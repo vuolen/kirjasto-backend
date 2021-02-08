@@ -14,6 +14,7 @@ export const getBookService: (db: Pick<DatabaseHandle, "getBooks" | "getAuthor"
             flow(
                 A.map(
                     book => ({
+                        id: book.id,
                         title: book.title,
                         author: O.toUndefined(book.author)
                     })
