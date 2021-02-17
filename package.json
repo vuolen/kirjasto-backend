@@ -12,7 +12,7 @@
   "author": "Lennu Vuolanne",
   "license": "GPL-3.0-or-later",
   "devDependencies": {
-    "@types/cors": "^2.8.9",
+    "@types/cors": "^2.8.10",
     "@types/express-jwt": "6.0.0",
     "@types/jest": "^26.0.20",
     "@types/pg": "^7.14.10",
