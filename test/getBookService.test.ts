@@ -1,9 +1,8 @@
 import * as E from "fp-ts/lib/Either"
 import * as TE from "fp-ts/lib/TaskEither"
 import * as O from "fp-ts/lib/Option"
-import { getBookService } from "../src/services/getBookService"
-import { getRightOrFail, getLeftOrFail } from "./util"
-import { unimpl } from "./addBookService.test"
+import { getBooksService } from "../src/services/getBooksService"
+import { getRightOrFail, getLeftOrFail, unimpl } from "./util"
 import { Request } from "express"
 
 import Either = E.Either
@@ -17,7 +16,7 @@ const MOCK_REQ = {} as Request
 
 const getBookWithMockedDbValue = (dbValue: any) => {
     const mockDb = {getBooks: TE.right(dbValue), getAuthor: () => TE.right(VALID_AUTHOR)}
-    return getBookService(mockDb)
+    return getBooksService(mockDb)
 }
 
 test("getBookService returns empty array as body when no books exist", done => {
@@ -40,7 +39,7 @@ test("getBookService returns correct book as body when a book exists", done => {
 
 test("getBookService returns error when database gives an error", done => {
     const mockDb = {getBooks: TE.left(new Error("Database error")), getAuthor: unimpl}
-    getBookService(mockDb)(MOCK_REQ)().then(
+    getBooksService(mockDb)(MOCK_REQ)().then(
         either => {
             const res = getLeftOrFail(either)
             expect(res).toBeInstanceOf(Error)

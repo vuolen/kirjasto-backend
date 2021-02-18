@@ -13,11 +13,13 @@ import { constantDelay } from "retry-ts";
 import Task = T.Task
 import TaskEither = TE.TaskEither
 import Option = O.Option
+import { getAuthorsService } from "../services/getAuthorsService";
 
 export interface DatabaseHandle {
     getBooks: TaskEither<Error, Array<Book>>,
     addBook: (book: BookInput) => TaskEither<Error, Book>
     getAuthor: (id: Author["id"]) => TaskEither<Error, Author>,
+    getAuthors: TaskEither<Error, Array<Author>>,
     addAuthor: (author: AuthorInput) => TaskEither<Error, Author>
 }
 
@@ -79,12 +81,13 @@ export const createDatabaseHandle = (): Task<DatabaseHandle> => {
             getBooks: getBooks(sqlHandle),
             addBook: addBook(sqlHandle),
             getAuthor: getAuthor(sqlHandle),
+            getAuthors: getAuthors(sqlHandle),
             addAuthor: addAuthor(sqlHandle)
         }))
     )
 }
-
-export const getBooks: (handle: SQLHandle) => DatabaseHandle["getBooks"] =
+ 
+const getBooks: (handle: SQLHandle) => DatabaseHandle["getBooks"] =
     (handle) => pipe(
         handle.run(sql.getAllBooks, undefined),
         TE.chain(
@@ -97,7 +100,7 @@ export const getBooks: (handle: SQLHandle) => DatabaseHandle["getBooks"] =
         )
     )
 
-export const addBook: (handle: SQLHandle) => DatabaseHandle["addBook"] =
+const addBook: (handle: SQLHandle) => DatabaseHandle["addBook"] =
     (handle) => ({title, author_id}) => pipe(
         handle.run(sql.addBook, {title, author_id: O.toUndefined(author_id)}),
         TE.chain(
@@ -108,13 +111,18 @@ export const addBook: (handle: SQLHandle) => DatabaseHandle["addBook"] =
         )
     )
 
-export const getAuthor: (handle: SQLHandle) => DatabaseHandle["getAuthor"] = 
+const getAuthor: (handle: SQLHandle) => DatabaseHandle["getAuthor"] = 
     (handle) => (id) => pipe(
         handle.run(sql.getAuthorById, {id}),
         TE.map(rows => rows[0] as Author)
     )
 
-export const addAuthor: (handle: SQLHandle) => DatabaseHandle["addAuthor"] =
+const getAuthors: (handle: SQLHandle) => DatabaseHandle["getAuthors"] =
+    (handle) => pipe(
+        handle.run(sql.getAllAuthors, undefined)
+    )
+
+const addAuthor: (handle: SQLHandle) => DatabaseHandle["addAuthor"] =
     (handle) => ({name}) => pipe(
         handle.run(sql.addAuthor, {name}),
         TE.map(rows => rows[0] as Author)

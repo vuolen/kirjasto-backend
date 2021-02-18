@@ -2,7 +2,7 @@ import * as express from 'express'
 import * as cors from 'cors'
 import { flow, pipe } from 'fp-ts/lib/function'
 import { createDatabaseHandle, DatabaseHandle } from './db/db'
-import { getBookService } from './services/getBookService'
+import { getBooksService } from './services/getBooksService'
 import { addBookService } from './services/addBookService'
 import * as TE from 'fp-ts/lib/TaskEither'
 import * as E from 'fp-ts/lib/Either'
@@ -15,6 +15,7 @@ import { Service } from './types/Service'
 
 
 import IO = I.IO
+import { getAuthorsService } from './services/getAuthorsService'
 
 const PORT = process.env.PORT || 8000
 
@@ -68,7 +69,8 @@ function createExpress(db: DatabaseHandle) {
         express(),
         app => app.use(cors()),
         app => app.use(express.json()),
-        app => app.get("/books", serviceToHandler(getBookService(db))),
+        app => app.get("/books", serviceToHandler(getBooksService(db))),
+        app => app.get("/authors", serviceToHandler(getAuthorsService(db))),
         app => app.post("/books",
             jwt({secret: jwksRsa.expressJwtSecret({
                 jwksUri: "https://kirjasto-e2e.eu.auth0.com/.well-known/jwks.json"

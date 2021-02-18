@@ -12,3 +12,5 @@ export const getLeftOrFail = <E, A>(e: Either<E, A>): E => {
     expect(E.isLeft(e)).toBeTruthy()
     return (e as E.Left<E>).left
 }
+
+export const unimpl = (...args: any) => { throw new Error("Unimplemented"); };

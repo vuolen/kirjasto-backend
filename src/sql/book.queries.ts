@@ -143,6 +143,32 @@ const getAuthorByIdIR: any = {"name":"GetAuthorById","params":[{"name":"id","tra
 export const getAuthorById = new PreparedQuery<IGetAuthorByIdParams,IGetAuthorByIdResult>(getAuthorByIdIR);
 
 
+/** 'GetAllAuthors' parameters type */
+export type IGetAllAuthorsParams = void;
+
+/** 'GetAllAuthors' return type */
+export interface IGetAllAuthorsResult {
+  id: number;
+  name: string;
+}
+
+/** 'GetAllAuthors' query type */
+export interface IGetAllAuthorsQuery {
+  params: IGetAllAuthorsParams;
+  result: IGetAllAuthorsResult;
+}
+
+const getAllAuthorsIR: any = {"name":"GetAllAuthors","params":[],"usedParamSet":{},"statement":{"body":"SELECT * FROM author","loc":{"a":620,"b":639,"line":28,"col":0}}};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * SELECT * FROM author
+ * ```
+ */
+export const getAllAuthors = new PreparedQuery<IGetAllAuthorsParams,IGetAllAuthorsResult>(getAllAuthorsIR);
+
+
 /** 'AddAuthor' parameters type */
 export interface IAddAuthorParams {
   name: string | null | void;
@@ -160,7 +186,7 @@ export interface IAddAuthorQuery {
   result: IAddAuthorResult;
 }
 
-const addAuthorIR: any = {"name":"AddAuthor","params":[{"name":"name","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":649,"b":652,"line":28,"col":33}]}}],"usedParamSet":{"name":true},"statement":{"body":"INSERT INTO author(name) VALUES(:name) RETURNING *","loc":{"a":616,"b":665,"line":28,"col":0}}};
+const addAuthorIR: any = {"name":"AddAuthor","params":[{"name":"name","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":698,"b":701,"line":31,"col":33}]}}],"usedParamSet":{"name":true},"statement":{"body":"INSERT INTO author(name) VALUES(:name) RETURNING *","loc":{"a":665,"b":714,"line":31,"col":0}}};
 
 /**
  * Query generated from SQL:

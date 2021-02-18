@@ -24,5 +24,8 @@ INSERT INTO book(title, author_id) VALUES(:title, :author_id) RETURNING *;
 /* @name GetAuthorById */
 SELECT * FROM author WHERE id=:id;
 
+/* @name GetAllAuthors */
+SELECT * FROM author;
+
 /* @name AddAuthor */
 INSERT INTO author(name) VALUES(:name) RETURNING *;

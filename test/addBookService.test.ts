@@ -2,7 +2,7 @@ import * as E from "fp-ts/lib/Either"
 import * as TE from "fp-ts/lib/TaskEither"
 import * as O from "fp-ts/lib/Option"
 import { addBookService } from "../src/services/addBookService"
-import { getLeftOrFail, getRightOrFail } from "./util"
+import { getLeftOrFail, getRightOrFail, unimpl } from "./util"
 import { isAPIError } from "../src/types/Service"
 import { Request } from "express"
 
@@ -12,8 +12,6 @@ const VALID_AUTHOR = {id: 1, name: "Test Testersson"}
 const VALID_BOOK = {id: 1, title: "Test Book", author_id: O.some(1), author: O.some(VALID_AUTHOR)}
 const VALID_ADDBOOK_REQUEST = {title: "Test Book", author: {name: "Test Testersson"}}
 const VALID_ADDBOOK_RESPONSE = {id: 1, title: "Test Book", author: VALID_AUTHOR}
-
-export const unimpl = (...args: any) => {throw new Error("Unimplemented")}
 
 test("addBookService returns a body with an error given an empty title", done => {
     const mockDb = {addBook: () => TE.right(VALID_BOOK), addAuthor: unimpl, getAuthor: unimpl}

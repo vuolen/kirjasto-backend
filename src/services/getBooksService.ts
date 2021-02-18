@@ -7,7 +7,7 @@ import { Service } from "../types/Service";
 
 import TaskEither = TE.TaskEither
 
-export const getBookService: (db: Pick<DatabaseHandle, "getBooks" | "getAuthor">) => Service = 
+export const getBooksService: (db: Pick<DatabaseHandle, "getBooks" | "getAuthor">) => Service = 
     (db) => () => pipe(
         db.getBooks,
         TE.map(
