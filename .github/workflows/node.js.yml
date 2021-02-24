@@ -23,11 +23,10 @@ jobs:
       uses: actions/checkout@v2
       with:
         repository: vuolen/kirjasto
+        path: kirjasto
+        submodules: "true"
     
-    - name: Checkout backend
-      uses: actions/checkout@v2
-      with:
-        path: kirjasto-backend
+    - run: cd ./kirjasto/backend
         
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
