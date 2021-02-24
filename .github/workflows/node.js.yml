@@ -26,7 +26,7 @@ jobs:
         path: kirjasto
         
     - name: Copy shared module
-      run: cp -r ./kirjasto/shared shared/
+      run: cp -r ./kirjasto/shared ../shared/
         
     - name: Checkout kirjasto-backend
       uses: actions/checkout@v2
