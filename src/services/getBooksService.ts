@@ -7,7 +7,7 @@ import * as E from "fp-ts/lib/Either";
 import { Service } from "../types/Service";
 
 import TaskEither = TE.TaskEither
-import { Book, GetBooksResponse } from "kirjasto-shared";
+import { GetBooksResponse } from "../shared/api/GetBooks";
 
 export const getBooksService: (db: Pick<DatabaseHandle, "getBooks" | "getAuthor">) => Service<GetBooksResponse> = 
     (db) => () => pipe(

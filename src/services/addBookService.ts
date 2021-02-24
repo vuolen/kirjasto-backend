@@ -5,8 +5,8 @@ import * as E from "fp-ts/lib/Either"
 import * as O from "fp-ts/lib/Option"
 import { failure } from 'io-ts/PathReporter'
 import { APIError, Service, ServiceResponse } from "../types/Service";
-import { AddBookRequest, AddBookResponse } from "kirjasto-shared"
 import { Errors } from "io-ts";
+import { AddBookRequest, AddBookResponse } from "../shared/api/AddBook";
 
 const trace = <T>(log: string) => (val: T) => {
     console.log(log, val)

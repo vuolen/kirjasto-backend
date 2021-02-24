@@ -32,9 +32,11 @@
     "express-jwt": "^6.0.0",
     "fp-ts": "^2.9.5",
     "fp-ts-contrib": "^0.1.21",
-    "io-ts": "^2.2.14",
+    "io-ts": "^2.2.15",
+    "io-ts-types": "^0.5.15",
     "jwks-rsa": "^1.12.2",
-    "kirjasto-shared": "file:../shared",
+    "monocle-ts": "^2.3.5",
+    "newtype-ts": "^0.3.4",
     "pg": "^8.5.1",
     "retry-ts": "^0.1.2"
   }
