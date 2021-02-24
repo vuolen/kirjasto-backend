@@ -25,18 +25,19 @@ jobs:
         repository: vuolen/kirjasto
         path: kirjasto
         
-    - name: Copy shared module
-      run: cp -r ./kirjasto/shared ../shared/
-        
     - name: Checkout kirjasto-backend
       uses: actions/checkout@v2
+      with:
+        path: kirjasto/backend
             
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
     - run: npm ci
+      working-directory: kirjasto/backend
     - run: npm test
+      working-directory: kirjasto/backend
     
     
   e2e_trigger:
