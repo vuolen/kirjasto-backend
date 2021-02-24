@@ -1,15 +1,11 @@
-import { flow, pipe } from "fp-ts/lib/function";
+import { flow, identity, pipe } from "fp-ts/lib/function";
 import { DatabaseHandle } from "../db/db";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as E from "fp-ts/lib/Either"
 import * as O from "fp-ts/lib/Option"
-import * as t from 'io-ts'
 import { failure } from 'io-ts/PathReporter'
 import { APIError, Service, ServiceResponse } from "../types/Service";
 import { AddBookRequest, AddBookResponse } from "kirjasto-shared"
-
-import TaskEither = TE.TaskEither
-import Option = O.Option
 import { Errors } from "io-ts";
 
 const trace = <T>(log: string) => (val: T) => {
@@ -21,37 +17,36 @@ export const addBookService = (db: Pick<DatabaseHandle, "addBook" | "getAuthor"
     ({body}) => pipe(
         body,
         AddBookRequest.decode,
-        TE.fromEither,
-        TE.chainW(
-            req => pipe(
-                req.author,
-                addOrGetExistingAuthor(db),
-            )
-        ),
-        TE.chainW(
+        E.map(
             flow(
-                O.map(
-                    author => author.id
+                TE.right,
+                TE.chainW(
+                    req => pipe(
+                        req.author,
+                        addOrGetExistingAuthor(db),
+                    )
                 ),
-                author_id => db.addBook({...body, author_id}),
+                TE.chainW(
+                    flow(
+                        O.map(
+                            author => author.id
+                        ),
+                        author_id => db.addBook({...body, author_id}),
+                    )
+                ),
+                TE.chainW(
+                    ({id, title, author}) => pipe(
+                        AddBookResponse.decode({id, title, author: O.toUndefined(author)}),
+                        E.mapLeft(E.toError),
+                        TE.fromEither
+                    )
+                )
             )
         ),
-        TE.chainW(
-            ({id, title, author}) => pipe(
-                AddBookResponse.decode({id, title, author: O.toUndefined(author)}),
-                TE.fromEither
-            )
-        ),
-        TE.fold(
-            error => {
-                if (error instanceof Error) {
-                    return TE.left(error)
-                } else {
-                    return TE.right({body: {error: failure(error)}, statusCode: 422})
-                }
-            },
-            response => TE.right({body: response})
-        ),
+        E.fold(
+            errors => TE.right(validationErrorsToAPIError(errors)),
+            TE.map(response => ({body: response}))
+        )
     )
 
 const validationErrorsToAPIError = <T>(errors: Errors): ServiceResponse<T> => ({body: {error: failure(errors)}, statusCode: 422})

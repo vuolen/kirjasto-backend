@@ -1,7 +1,7 @@
 import { TaskEither } from "fp-ts/lib/TaskEither";
 import { Request } from "express"
 
-export type Service<T = any> = (req: Request) => TaskEither<any, ServiceResponse<T>>
+export type Service<T = any> = (req: Request) => TaskEither<Error, ServiceResponse<T>>
 
 export interface ServiceResponse<T = any> {
     statusCode?: number,

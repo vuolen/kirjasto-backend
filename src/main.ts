@@ -36,7 +36,10 @@ const serviceToHandler = (service: Service): express.RequestHandler =>
         req,
         service,
         TE.fold(
-            err => T.of({body: {error: "Internal server error: " + JSON.stringify(err)}, statusCode: 500}),
+            err => {
+                console.log(err)
+                return T.of({body: {error: "Internal server error"}, statusCode: 500})
+            },
             right => T.of({body: right.body, statusCode: right.statusCode || 200})
         ),
         taskEither => taskEither().then(
