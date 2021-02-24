@@ -19,7 +19,16 @@ jobs:
         node-version: [10.x, 12.x, 14.x]
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout kirjasto
+      uses: actions/checkout@v2
+      with:
+        repository: vuolen/kirjasto
+    
+    - name: Checkout frontend
+      uses: actions/checkout@v2
+      with:
+        path: kirjasto-frontend
+        
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
       with:
