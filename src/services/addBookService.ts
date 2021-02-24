@@ -5,60 +5,66 @@ import * as E from "fp-ts/lib/Either"
 import * as O from "fp-ts/lib/Option"
 import * as t from 'io-ts'
 import { failure } from 'io-ts/PathReporter'
+import { APIError, Service, ServiceResponse } from "../types/Service";
+import { AddBookRequest, AddBookResponse } from "kirjasto-shared"
 
 import TaskEither = TE.TaskEither
 import Option = O.Option
-import { Service, ServiceResponse } from "../types/Service";
+import { Errors } from "io-ts";
 
-const nonemptystring = new t.Type<string, string, unknown>(
-    'nonemptystring',
-    (input: unknown): input is string => typeof input === 'string' && input.length > 0,
-    (input, context) => (typeof input === 'string' && input.length > 0 ? t.success(input) : t.failure(input, context)),
-    t.identity
-)
-
-const AddBookRequest = t.type({
-    title: nonemptystring,
-    author: t.union([t.number, t.type({name: nonemptystring}), t.undefined])
-})
-
-type AddBookRequest = t.TypeOf<typeof AddBookRequest>
-
-const AddBookResponse = t.type({
-    id: t.number,
-    title: nonemptystring,
-    author: t.union([t.type({name: nonemptystring}), t.undefined])
-})
-
-type AddBookResponse = t.TypeOf<typeof AddBookResponse>
+const trace = <T>(log: string) => (val: T) => {
+    console.log(log, val)
+    return val
+}
 
 export const addBookService = (db: Pick<DatabaseHandle, "addBook" | "getAuthor" | "addAuthor">): Service<AddBookResponse> =>
-    flow(
-        req => req.body,
+    ({body}) => pipe(
+        body,
         AddBookRequest.decode,
-        E.fold(
-            errors => TE.right({body: {error: failure(errors)}, statusCode: 422} as ServiceResponse),
+        TE.fromEither,
+        TE.chainW(
             req => pipe(
                 req.author,
-                O.fromNullable,
-                O.map(
-                    author => typeof author === "number" ? db.getAuthor(author) : db.addAuthor(author)
-                ),
-                O.sequence(TE.ApplicativePar),
-                TE.chain(
-                    flow(
-                        O.map(
-                            author => author.id
-                        ),
-                        author_id => db.addBook({...req, author_id}),
-                    )
-                ),
-                TE.map(
-                    ({id, title, author}) => pipe(
-                        AddBookResponse.encode({id, title, author: O.toUndefined(author)}),
-                        response => ({body: response})
-                    )
-                )
+                addOrGetExistingAuthor(db),
             )
-        )
+        ),
+        TE.chainW(
+            flow(
+                O.map(
+                    author => author.id
+                ),
+                author_id => db.addBook({...body, author_id}),
+            )
+        ),
+        TE.chainW(
+            ({id, title, author}) => pipe(
+                AddBookResponse.decode({id, title, author: O.toUndefined(author)}),
+                TE.fromEither
+            )
+        ),
+        TE.fold(
+            error => {
+                if (error instanceof Error) {
+                    return TE.left(error)
+                } else {
+                    return TE.right({body: {error: failure(error)}, statusCode: 422})
+                }
+            },
+            response => TE.right({body: response})
+        ),
+    )
+
+const validationErrorsToAPIError = <T>(errors: Errors): ServiceResponse<T> => ({body: {error: failure(errors)}, statusCode: 422})
+
+/*
+    Creates a new author or gets an existing one
+*/
+const addOrGetExistingAuthor = (db: Pick<DatabaseHandle, "getAuthor" | "addAuthor">) => (author: AddBookRequest["author"]) =>
+    pipe(
+        author,
+        O.fromNullable,
+        O.map(
+            author => typeof author === "number" ? db.getAuthor(author) : db.addAuthor(author)
+        ),
+        O.sequence(TE.ApplicativePar)
     )

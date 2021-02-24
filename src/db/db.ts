@@ -13,7 +13,6 @@ import { constantDelay } from "retry-ts";
 import Task = T.Task
 import TaskEither = TE.TaskEither
 import Option = O.Option
-import { getAuthorsService } from "../services/getAuthorsService";
 
 export interface DatabaseHandle {
     getBooks: TaskEither<Error, Array<Book>>,
@@ -61,10 +60,9 @@ const databaseRowToBook = (handle: SQLHandle) => (row: any) =>
         ),
         O.sequence(TE.ApplicativePar),
         TE.map(
-            author => ({title: row.title, author} as Book)
+            author => ({id: row.id, title: row.title, author} as Book)
         )
     )
-
 
 
 // EXPORTS

@@ -36,7 +36,7 @@ const serviceToHandler = (service: Service): express.RequestHandler =>
         req,
         service,
         TE.fold(
-            err => T.of({body: {error: "Internal server error: " + err}, statusCode: 500}),
+            err => T.of({body: {error: "Internal server error: " + JSON.stringify(err)}, statusCode: 500}),
             right => T.of({body: right.body, statusCode: right.statusCode || 200})
         ),
         taskEither => taskEither().then(
@@ -78,21 +78,6 @@ function createExpress(db: DatabaseHandle) {
             serviceToHandler(
                 requirePermissions(addBookService(db), ["add:book"])
             )
-/*                 pipe(
-                    req.user.scope && req.user.scope.includes("add:book") ? E.right(req) : E.left("Invalid permissions: add:book"),
-                    E.map(
-                        serviceToHandler(addBookService(db))
-                    ),
-                    E.fold(
-                        err => Promise.resolve({body: {error: err}, statusCode: 401}),
-                        right => right
-                    )
-                ).then(
-                    response => {
-                        res.statusCode = response.statusCode
-                        res.json(response.body)
-                    }
-                ) */
         )
     )
 }

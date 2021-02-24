@@ -34,6 +34,7 @@
     "fp-ts-contrib": "^0.1.21",
     "io-ts": "^2.2.14",
     "jwks-rsa": "^1.12.2",
+    "kirjasto-shared": "file:../shared",
     "pg": "^8.5.1",
     "retry-ts": "^0.1.2"
   }
