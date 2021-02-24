@@ -24,10 +24,10 @@ jobs:
       with:
         repository: vuolen/kirjasto
     
-    - name: Checkout frontend
+    - name: Checkout backend
       uses: actions/checkout@v2
       with:
-        path: kirjasto-frontend
+        path: kirjasto-backend
         
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
