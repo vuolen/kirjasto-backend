@@ -5,9 +5,9 @@ import * as O from "fp-ts/lib/Option";
 import * as A from "fp-ts/lib/Array";
 import * as E from "fp-ts/lib/Either";
 import { Service } from "../types/Service";
+import { GetBooksResponse } from "kirjasto-shared"
 
 import TaskEither = TE.TaskEither
-import { GetBooksResponse } from "../shared/api/GetBooks";
 
 export const getBooksService: (db: Pick<DatabaseHandle, "getBooks" | "getAuthor">) => Service<GetBooksResponse> = 
     (db) => () => pipe(
