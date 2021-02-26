@@ -4,7 +4,6 @@
   "description": "Backend for a simple library reservation system",
   "main": "main.ts",
   "scripts": {
-    "preinstall": "cd ../shared && npm pack && cd ../backend && npm i kirjasto-shared",
     "production": "ts-node --files src/main.ts",
     "development": "ts-node-dev --files src/main.ts",
     "test": "jest"
@@ -36,7 +35,7 @@
     "io-ts": "^2.2.15",
     "io-ts-types": "^0.5.15",
     "jwks-rsa": "^1.12.2",
-    "kirjasto-shared": "file:../shared/kirjasto-shared-0.0.1.tgz",
+    "kirjasto-shared": "github:vuolen/kirjasto-shared",
     "monocle-ts": "^2.3.5",
     "newtype-ts": "^0.3.4",
     "pg": "^8.5.1",
