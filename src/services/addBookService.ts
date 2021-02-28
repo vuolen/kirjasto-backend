@@ -1,4 +1,4 @@
-import { flow, identity, pipe } from "fp-ts/lib/function";
+import { flow, pipe } from "fp-ts/lib/function";
 import { DatabaseHandle } from "../db/db";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as E from "fp-ts/lib/Either"
@@ -7,11 +7,6 @@ import { failure } from 'io-ts/PathReporter'
 import { Service, ServiceResponse } from "../types/Service";
 import { Errors } from "io-ts";
 import { AddBookRequest, AddBookResponse } from "kirjasto-shared";
-
-const trace = <T>(log: string) => (val: T) => {
-    console.log(log, val)
-    return val
-}
 
 export const addBookService = (db: Pick<DatabaseHandle, "addBook" | "getAuthor" | "addAuthor">): Service<AddBookResponse> =>
     ({body}) => pipe(
@@ -51,9 +46,6 @@ export const addBookService = (db: Pick<DatabaseHandle, "addBook" | "getAuthor"
 
 const validationErrorsToAPIError = <T>(errors: Errors): ServiceResponse<T> => ({body: {error: JSON.stringify(failure(errors))}, statusCode: 422})
 
-/*
-    Creates a new author or gets an existing one
-*/
 const addOrGetExistingAuthor = (db: Pick<DatabaseHandle, "getAuthor" | "addAuthor">) => (author: AddBookRequest["author"]) =>
     pipe(
         author,

@@ -3,10 +3,8 @@ import * as TE from "fp-ts/lib/TaskEither"
 import * as O from "fp-ts/lib/Option"
 import { addBookService } from "../src/services/addBookService"
 import { getLeftOrFail, getRightOrFail, unimpl } from "./util"
-import { isAPIError } from "../src/types/Service"
 import { Request } from "express"
-
-import Either = E.Either
+import { APIError } from "kirjasto-shared"
 
 const VALID_AUTHOR = {id: 1, name: "Test Testersson"}
 const VALID_BOOK = {id: 1, title: "Test Book", author_id: O.some(1), author: O.some(VALID_AUTHOR)}
@@ -19,7 +17,7 @@ test("addBookService returns a body with an error given an empty title", done =>
     addBookService(mockDb)(mockReq)().then(
         either => {
             const err = getRightOrFail(either)
-            expect(isAPIError(err.body)).toBeTruthy()
+            expect(APIError.is(err.body)).toBeTruthy()
             done()
         }
     )
