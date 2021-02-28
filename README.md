@@ -1,6 +1,8 @@
 # kirjasto-backend
 ![Build status](https://github.com/vuolen/kirjasto-backend/workflows/Build/badge.svg)
 
+The backend for the [kirjasto](https://github.com/vuolen/kirjasto) library management system
+
 # Documentation
 
 This project uses
