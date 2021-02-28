@@ -49,7 +49,7 @@ export const addBookService = (db: Pick<DatabaseHandle, "addBook" | "getAuthor"
         )
     )
 
-const validationErrorsToAPIError = <T>(errors: Errors): ServiceResponse<T> => ({body: {error: failure(errors)}, statusCode: 422})
+const validationErrorsToAPIError = <T>(errors: Errors): ServiceResponse<T> => ({body: {error: JSON.stringify(failure(errors))}, statusCode: 422})
 
 /*
     Creates a new author or gets an existing one
