@@ -36,7 +36,7 @@
     "io-ts-types": "^0.5.15",
     "jwks-rsa": "^1.12.3",
     "kirjasto-shared": "github:vuolen/kirjasto-shared",
-    "monocle-ts": "^2.3.7",
+    "monocle-ts": "^2.3.9",
     "newtype-ts": "^0.3.4",
     "pg": "^8.5.1",
     "retry-ts": "^0.1.2"
