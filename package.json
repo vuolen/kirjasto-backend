@@ -38,7 +38,7 @@
     "kirjasto-shared": "github:vuolen/kirjasto-shared",
     "monocle-ts": "^2.3.9",
     "newtype-ts": "^0.3.4",
-    "pg": "^8.5.1",
+    "pg": "^8.6.0",
     "retry-ts": "^0.1.2"
   }
 }
