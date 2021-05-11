@@ -33,7 +33,7 @@
     "fp-ts": "^2.10.5",
     "fp-ts-contrib": "^0.1.21",
     "io-ts": "^2.2.16",
-    "io-ts-types": "^0.5.15",
+    "io-ts-types": "^0.5.16",
     "jwks-rsa": "^1.12.3",
     "kirjasto-shared": "github:vuolen/kirjasto-shared",
     "monocle-ts": "^2.3.10",
